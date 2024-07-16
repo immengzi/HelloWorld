@@ -1,11 +1,12 @@
 import { common } from '@kit.AbilityKit';
 import { util } from '@kit.ArkTS';
 import { Prompt } from '@kit.ArkUI';
+import { UserInfo } from '../model/UserInfo';
 
 @Entry
 @Component
 struct Index {
-  private userInfo: string = '';
+  private userInfo: UserInfo[] = [];
 
   aboutToAppear(): void {
     let context = getContext(this) as common.UIAbilityContext;
@@ -20,19 +21,24 @@ struct Index {
     resourceManager.getRawFileContent('user_data.json').then(value => {
       let rawFile = value;
       let textDecoder = util.TextDecoder.create('utf-8', textDecoderOptions);
-      this.userInfo = textDecoder.decodeWithStream(rawFile, decodeWithStreamOptions);
+      let decodedText = textDecoder.decodeWithStream(rawFile, decodeWithStreamOptions);
+      this.userInfo = JSON.parse(decodedText) as UserInfo[];
     })
   }
 
   build() {
     RelativeContainer() {
       Button('读取 json 文件')
+        .alignRules({
+          center: { anchor: '__container__', align: VerticalAlign.Center },
+          middle: { anchor: '__container__', align: HorizontalAlign.Center }
+        })
         .onClick(() => {
           Prompt.showToast({
-            message: this.userInfo,
+            message: JSON.stringify(this.userInfo, null, 2),
             duration: 8000,
-          })
-        })
+          });
+        });
     }
   }
 }
